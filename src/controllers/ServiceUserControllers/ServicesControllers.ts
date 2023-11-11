@@ -29,6 +29,20 @@ export const getServicesByUser:RequestHandler=async(req,res,next)=>{
     }
 }
 
+export const getServiceById:RequestHandler=async(req,res,next)=>{
+    try {
+        const token=req.headers.authorization?.split(' ')[1]
+        const {id}=req.params
+        if(!token) return res.status(401).json({data:null,message:"Unauthorized"})
+        const userid = accessTokenAuthenticator.TokenAuthenticator(token)
+        if(!userid) return res.status(401).json({data:null,message:"Unauthorized"})
+        const service=await Service.findById(id)
+        return res.status(200).json({data:service,message:"Service"})
+    } catch (error) {
+        next(error)
+        return res.status(500).json({data:null,message:"Internal Server error"})
+    }
+}
 
 export const NewService:RequestHandler=async(req,res,next)=>{
     const session =await startSession()
@@ -58,6 +72,8 @@ export const NewService:RequestHandler=async(req,res,next)=>{
     } catch (error) {
         next(error)
         return res.status(500).json({data:null,message:"Internal Server error"})
+    } finally{
+        await session.commitTransaction()
     }
 }
 

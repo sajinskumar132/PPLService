@@ -9,6 +9,6 @@ ServiceRoutes.post('/signup',SignUp)
 ServiceRoutes.get('/allservices',getAllServices)
 ServiceRoutes.get('/services',getServicesByUser)
 ServiceRoutes.post('/newservice',NewService)
-ServiceRoutes.post('/:id/updateservice',UpdateService)
+ServiceRoutes.put('/:id/updateservice',UpdateService)
 ServiceRoutes.delete('/:id/deleteservice',DeleteServices)
 export default ServiceRoutes
