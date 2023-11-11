@@ -83,9 +83,10 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
             id: existingUser._id,
             name: existingUser.name,
             email: existingUser.email,
+            role: existingUser.role,
             token
         };
-        return res.status(200).json({ data: data, message: "Sucessfully Created" });
+        return res.status(200).json({ data: data, message: "Sucessfully login" });
     }
     catch (error) {
         next(error);
