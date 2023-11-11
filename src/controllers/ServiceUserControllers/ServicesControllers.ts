@@ -3,6 +3,8 @@ import Service from "../../Models/ServiceProviders/Service";
 import { accessTokenAuthenticator } from "../../Services/accessTokenAuthenticator";
 import { RequestHandler } from "express";
 import { ServiceCatogory } from "../../util/Enums";
+import { startSession } from "mongoose";
+import ServiceUser from '../../Models/ServiceProviders/ServiceUser'
 export const getAllServices:RequestHandler=async(req,res,next)=>{
     try {
         const Services=await Service.find()
@@ -29,11 +31,15 @@ export const getServicesByUser:RequestHandler=async(req,res,next)=>{
 
 
 export const NewService:RequestHandler=async(req,res,next)=>{
+    const session =await startSession()
     try {
+        session.startTransaction({session})
         const token=req.headers.authorization?.split(' ')[1]
         if(!token) return res.status(401).json({data:null,message:"Unauthorized"})
         const userid = accessTokenAuthenticator.TokenAuthenticator(token)
         if(!userid) return res.status(401).json({data:null,message:"Unauthorized"})
+        const existingUser=await ServiceUser.findById(userid)
+        if(!existingUser) return res.status(400).json({data:null,message:"not found"})
         const {category,experience,description,location}=req.body
         let IsValidCCategory=false
         const keys = Object.keys(ServiceCatogory);
@@ -44,7 +50,9 @@ export const NewService:RequestHandler=async(req,res,next)=>{
             }
         }
         if(!IsValidCCategory) return res.status(400).json({data:null,message:"Invalid Category"})
-        const newService=new Service({userId:userid,category,experience,description,location,status:"Approved"})
+        const newService:any=new Service({userId:userid,category,experience,description,location,status:"Approved"})
+        existingUser.service.push(newService)
+        await existingUser.save()
         await newService.save()
         return res.status(201).json({data:newService,message:"Sucessfully created service"})
     } catch (error) {
